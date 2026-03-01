@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-
+import MasterIndex from "./pages/MasterIndex";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -19,6 +19,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+           
+            <Route path="/master-index" element={<MasterIndex />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
