@@ -1,5 +1,5 @@
 const BASE = import.meta.env.DEV
-  ? '/apex'
+  ? '/site_builder/apex'
   : 'https://rodzaki.github.io/apex'
 
 export const api = {
