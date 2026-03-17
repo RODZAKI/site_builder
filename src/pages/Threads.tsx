@@ -11,7 +11,7 @@ export default function Threads() {
       <h1>Thread Catalog</h1>
 
       <ul>
-        {data?.map((thread: any) => (
+        {data?.threads?.map((thread: any) => (
           <li key={thread.id}>
             <a
               href={"https://rodzaki.github.io${thread.pdf}"}
