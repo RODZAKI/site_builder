@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MasterIndex from "./pages/MasterIndex";
+import Threads from "./pages/Threads";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -21,6 +22,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
            
             <Route path="/master-index" element={<MasterIndex />} />
+            <Route path="/threads" element={<Threads />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

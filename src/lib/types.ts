@@ -146,6 +146,7 @@ export interface CardExport {
   axis: CardAxis;
   depth: number;
   relations: string[];
+   keywords?: string[];
   version: string;
   created: string;
   status: CardStatus;
