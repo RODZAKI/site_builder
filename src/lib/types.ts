@@ -112,3 +112,41 @@ export interface Proposal {
 
 // View state
 export type AppView = 'home' | 'field-detail' | 'artifact-detail' | 'create-artifact' | 'proposals';
+
+
+export type CardDomain =
+  | "dharma"
+  | "logos"
+  | "maat"
+  | "dao"
+  | "rta"
+  | "ayni"
+  | "ubuntu"
+  | "mitakuye-oyasin"
+  | "sumak-kawsay";
+
+export type CardAxis =
+  | "temporal"
+  | "structural"
+  | "ontological"
+  | "relational"
+  | "operational";
+
+export type CardStatus =
+  | "candidate"
+  | "approved"
+  | "deprecated";
+
+export interface CardExport {
+  id: string;
+  thread: string;
+  title: string;
+  content: string;
+  domain: CardDomain[];
+  axis: CardAxis;
+  depth: number;
+  relations: string[];
+  version: string;
+  created: string;
+  status: CardStatus;
+}
