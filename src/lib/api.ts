@@ -1,4 +1,4 @@
-const CORPUS_BASE = "https://rodzaki.github.io";
+const CORPUS_BASE = "/site_builder";
 
 export const api = {
   threads: () =>
