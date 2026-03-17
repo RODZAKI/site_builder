@@ -1,4 +1,4 @@
-const CORPUS_BASE = "/site_builder";
+const CORPUS_BASE = "https://rodzaki.github.io/apex";
 
 export const api = {
   threads: () =>
