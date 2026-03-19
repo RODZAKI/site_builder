@@ -14,7 +14,7 @@ export default function ThreadView() {
     console.log("FETCH RESULT:", result);
     return result;
   },
-  enabled: !!id,
+  enabled: true,
 });
 
   if (isLoading) return <div style={{ padding: 32 }}>Loading thread...</div>;
