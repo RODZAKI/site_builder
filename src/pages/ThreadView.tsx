@@ -7,10 +7,15 @@ export default function ThreadView() {
   const navigate = useNavigate();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["artifact", id],
-    queryFn: () => api.artifact(id!),
-    enabled: !!id,
-  });
+  queryKey: ["artifact", id],
+  queryFn: async () => {
+    console.log("Fetching artifact for:", id);
+    const result = await api.artifact(id);
+    console.log("FETCH RESULT:", result);
+    return result;
+  },
+  enabled: !!id,
+});
 
   if (isLoading) return <div style={{ padding: 32 }}>Loading thread...</div>;
   if (error) return <div style={{ padding: 32 }}>Failed to load thread.</div>;
