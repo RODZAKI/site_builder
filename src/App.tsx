@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MasterIndex from "./pages/MasterIndex";
 import Threads from "./pages/Threads";
+import ThreadView from "./pages/ThreadView";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -20,9 +21,9 @@ const App = () => (
         <BrowserRouter basename="/site_builder">
           <Routes>
             <Route path="/" element={<Index />} />
-           
             <Route path="/master-index" element={<MasterIndex />} />
             <Route path="/threads" element={<Threads />} />
+            <Route path="/thread/:id" element={<ThreadView />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

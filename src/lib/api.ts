@@ -1,4 +1,5 @@
 const CORPUS_BASE = "https://rodzaki.github.io/apex";
+const ARTIFACTS_BASE = "https://rodzaki.github.io/artifacts";
 
 export const api = {
   threads: () =>
@@ -16,6 +17,18 @@ export const api = {
   drawer: (name: string) =>
     fetch(`${CORPUS_BASE}/catalog/drawers/${name}.json`).then((r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}: Failed to load drawer ${name}`);
+      return r.json();
+    }),
+
+  corpus: () =>
+    fetch(`${ARTIFACTS_BASE}/thread-corpus.json`).then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}: Failed to load corpus index`);
+      return r.json();
+    }),
+
+  artifact: (id: string) =>
+    fetch(`${ARTIFACTS_BASE}/threads/${id}.json`).then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}: Failed to load artifact ${id}`);
       return r.json();
     }),
 };
