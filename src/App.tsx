@@ -1,3 +1,6 @@
+import { useEffect } from "react"
+import { testSupabase } from "./lib/api"
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,6 +36,12 @@ function ThreadQueryHandler() {
 }
 
 export default function App() {
+
+  // ✅ THIS is the only thing we added
+  useEffect(() => {
+    testSupabase()
+  }, [])
+
   return (
     <ThemeProvider defaultTheme="light">
       <QueryClientProvider client={queryClient}>
@@ -49,7 +58,6 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </HashRouter>
-      
 
         </TooltipProvider>
       </QueryClientProvider>

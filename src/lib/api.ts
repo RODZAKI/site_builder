@@ -1,3 +1,5 @@
+import { supabase } from './supabase'
+
 const CORPUS_BASE = "https://rodzaki.github.io/apex";
 const ARTIFACTS_BASE = "https://rodzaki.github.io/artifacts";
 
@@ -32,3 +34,12 @@ export const api = {
       return r.json();
     }),
 };
+
+export async function testSupabase() {
+  const { data, error } = await supabase
+    .from('threads')
+    .select('*')
+    .limit(1)
+
+  console.log('SUPABASE TEST:', data, error)
+}
