@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { toast } from '@/components/ui/use-toast';
+import { fetchFields } from '../lib/services';
+import { useStore } from '../lib/store';
 
 interface AppContextType {
   sidebarOpen: boolean;
@@ -18,18 +18,21 @@ export const useAppContext = () => useContext(AppContext);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { setFields } = useStore();
+
+  useEffect(() => {
+    fetchFields().then((fields) => {
+      setFields(fields);
+      console.log('Fields loaded:', fields);
+    });
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
   };
 
   return (
-    <AppContext.Provider
-      value={{
-        sidebarOpen,
-        toggleSidebar,
-      }}
-    >
+    <AppContext.Provider value={{ sidebarOpen, toggleSidebar }}>
       {children}
     </AppContext.Provider>
   );
