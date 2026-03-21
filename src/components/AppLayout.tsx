@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useStore } from '../lib/store';
+
 import Header from './Header';
 import Hero from './Hero';
 import Principles from './Principles';

@@ -49,17 +49,31 @@ export async function fetchArtifacts(fieldId: string): Promise<Artifact[]> {
 
 export async function createArtifact(
   artifact: Omit<Artifact, 'id' | 'created_at' | 'updated_at'>
-): Promise<Artifact | null> {
+): Promise<Artifact> {
+  // 1. HARD VALIDATION
+  if (!artifact.title || !artifact.content || !artifact.field_id) {
+    throw new Error(
+      "createArtifact: Missing required fields (title, content, field_id)"
+    );
+  }
+
+  // 2. INSERT
   const { data, error } = await supabase
     .from('artifacts')
     .insert([artifact])
     .select()
     .single();
 
+  // 3. FAIL HARD
   if (error) {
     console.error('createArtifact error:', error);
-    return null;
+    throw error;
   }
 
+  if (!data) {
+    throw new Error("createArtifact: No data returned from insert");
+  }
+
+  // 4. RETURN VERIFIED ARTIFACT
   return data as Artifact;
 }
