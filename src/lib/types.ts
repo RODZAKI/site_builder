@@ -25,12 +25,11 @@ export interface Field {
   name: string;
   mode: FieldMode;
   steward_user_id: string;
-  steward_display_name: string;
-  steward_bio?: string;
+  steward_display_name?: string | null;
+  steward_bio?: string | null;
   participant_visibility: ParticipantVisibility;
   created_at: string;
   updated_at: string;
-  // Computed / joined
   artifact_count?: number;
   participant_count?: number;
   constraint_count?: number;
@@ -42,7 +41,6 @@ export interface FieldMembership {
   user_id: string;
   role: MembershipRole;
   created_at: string;
-  // Joined
   profile?: Profile;
 }
 
@@ -55,11 +53,10 @@ export interface Artifact {
   title: string;
   content: string;
   original_author: string;
-  superseded_by?: string;
+  superseded_by?: string | null;
   created_at: string;
   updated_at: string;
-  // Joined
-  author_name?: string;
+  author_name?: string | null;
   version_count?: number;
 }
 
@@ -68,9 +65,9 @@ export interface ArtifactVersion {
   artifact_id: string;
   version_number: number;
   content_snapshot: string;
-  edited_by: string;
+  edited_by?: string | null;
   created_at: string;
-  editor_name?: string;
+  editor_name?: string | null;
 }
 
 export interface Constraint {
@@ -81,9 +78,9 @@ export interface Constraint {
   status: ConstraintStatus;
   visibility: ConstraintVisibility;
   created_by: string;
-  supersedes_constraint_id?: string;
+  supersedes_constraint_id?: string | null;
   created_at: string;
-  creator_name?: string;
+  creator_name?: string | null;
 }
 
 export interface Relation {
@@ -94,25 +91,30 @@ export interface Relation {
   visibility: RelationVisibility;
   created_by: string;
   created_at: string;
-  from_title?: string;
-  to_title?: string;
+  from_title?: string | null;
+  to_title?: string | null;
 }
 
 export interface Proposal {
   id: string;
   field_id: string;
-  linked_artifact_id?: string;
+  linked_artifact_id?: string | null;
   display_name: string;
   email: string;
   content: string;
   status: ProposalStatus;
   created_at: string;
-  linked_artifact_title?: string;
+  linked_artifact_title?: string | null;
 }
 
-// View state
-export type AppView = 'home' | 'field-detail' | 'artifact-detail' | 'create-artifact' | 'proposals';
+export type AppView =
+  | 'home'
+  | 'field-detail'
+  | 'artifact-detail'
+  | 'create-artifact'
+  | 'proposals';
 
+/* ---------- DOMAIN 8 EXTENSIONS ---------- */
 
 export type CardDomain =
   | "dharma"
@@ -146,7 +148,7 @@ export interface CardExport {
   axis: CardAxis;
   depth: number;
   relations: string[];
-   keywords?: string[];
+  keywords?: string[];
   version: string;
   created: string;
   status: CardStatus;
