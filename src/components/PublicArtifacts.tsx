@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useStore } from '../lib/store';
+import { getPublicArtifacts, getFields } from '../lib/services';
 import ArtifactCard from './ArtifactCard';
 import { Globe } from 'lucide-react';
 
 export default function PublicArtifacts() {
-  const { artifacts, fields, setView } = useStore();
-  const publicArtifacts = artifacts.filter(a => a.visibility === 'PUBLIC' && a.state === 'LIVE').slice(0, 6);
+  const { artifacts, fields, setArtifacts, setFields } = useStore();
+
+  useEffect(() => {
+    getPublicArtifacts()
+      .then(setArtifacts)
+      .catch(err => console.error('PUBLIC ARTIFACT LOAD ERROR:', err));
+
+    if (fields.length === 0) {
+      getFields()
+        .then(setFields)
+        .catch(err => console.error('FIELD LOAD ERROR:', err));
+    }
+  }, [setArtifacts, setFields, fields.length]);
+
+  const publicArtifacts = artifacts.slice(0, 6);
 
   if (publicArtifacts.length === 0) return null;
 
