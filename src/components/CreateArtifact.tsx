@@ -22,6 +22,7 @@ const visibilities: { value: ArtifactVisibility; label: string; icon: React.Elem
 
 export default function CreateArtifact() {
   const { selectedFieldId, fields, currentUser, setView } = useStore();
+
   const field = fields.find(f => f.id === selectedFieldId);
 
   const [title, setTitle] = useState('');
@@ -35,6 +36,7 @@ export default function CreateArtifact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!title.trim() || !content.trim()) return;
 
     setSaving(true);
@@ -47,20 +49,16 @@ export default function CreateArtifact() {
         content: content.trim(),
         type,
         visibility,
+        state: 'DRAFT',
+        original_author: currentUser.id,
       });
 
-      console.log("CREATED:", result);
+      if (!result?.id) throw new Error('No ID returned from Supabase');
 
-      const newId = result?.id;
-
-      if (!newId) {
-        throw new Error("No ID returned from Supabase");
-      }
-
-      setView('artifact-detail', selectedFieldId, newId);
+      setView('artifact-detail', selectedFieldId, result.id);
     } catch (err: any) {
-      console.error("CREATE FAILED:", err);
-      setError(err.message || "Failed to create artifact");
+      console.error('CREATE FAILED:', err);
+      setError(err.message || 'Failed to create artifact');
     } finally {
       setSaving(false);
     }
@@ -69,9 +67,10 @@ export default function CreateArtifact() {
   return (
     <div className="min-h-screen pt-20 pb-16 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto">
+
         <button
           onClick={() => setView('field-detail', selectedFieldId)}
-          className="flex items-center gap-2 text-sm text-slate-400 hover:text-white mb-6 transition-colors"
+          className="flex items-center gap-2 text-sm text-slate-400 hover:text-white mb-6"
         >
           <ArrowLeft className="w-4 h-4" /> Back to {field.name}
         </button>
@@ -80,42 +79,39 @@ export default function CreateArtifact() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* Type selector */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">Artifact Type</label>
+            <label className="block text-sm text-slate-300 mb-3">Artifact Type</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {types.map(t => (
                 <button
                   key={t.value}
                   type="button"
                   onClick={() => setType(t.value)}
-                  className={`p-3 rounded-xl border text-left transition-all ${
+                  className={`p-3 rounded-xl border ${
                     type === t.value
-                      ? 'bg-indigo-500/10 border-indigo-500/30 ring-1 ring-indigo-500/30'
-                      : 'bg-slate-900/40 border-slate-800/50 hover:border-slate-700'
+                      ? 'bg-indigo-500/10 border-indigo-500/30'
+                      : 'bg-slate-900/40 border-slate-800/50'
                   }`}
                 >
-                  <t.icon className={`w-5 h-5 mb-1.5 ${type === t.value ? 'text-indigo-400' : 'text-slate-500'}`} />
-                  <div className={`text-sm font-medium ${type === t.value ? 'text-white' : 'text-slate-300'}`}>{t.label}</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">{t.desc}</div>
+                  <t.icon className="w-5 h-5 text-indigo-400 mb-1" />
+                  <div className="text-sm text-white">{t.label}</div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Visibility */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">Visibility</label>
+            <label className="block text-sm text-slate-300 mb-3">Visibility</label>
             <div className="flex gap-3">
               {visibilities.map(v => (
                 <button
                   key={v.value}
                   type="button"
                   onClick={() => setVisibility(v.value)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
                     visibility === v.value
-                      ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300'
-                      : 'bg-slate-900/40 border-slate-800/50 text-slate-400 hover:border-slate-700'
+                      ? 'bg-indigo-500/10 border-indigo-500/30'
+                      : 'bg-slate-900/40 border-slate-800/50'
                   }`}
                 >
                   <v.icon className="w-4 h-4" />
@@ -125,51 +121,31 @@ export default function CreateArtifact() {
             </div>
           </div>
 
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-              placeholder="Enter artifact title..."
-            />
-          </div>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
+            className="w-full bg-slate-900 border px-4 py-3 text-white"
+          />
 
-          {/* Content */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Content</label>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-              rows={16}
-              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none font-mono leading-relaxed"
-              placeholder="Write your artifact content here..."
-            />
-          </div>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={16}
+            className="w-full bg-slate-900 border px-4 py-3 text-white"
+          />
 
-          {/* Error */}
-          {error && (
-            <div className="text-red-400 text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="text-red-400 text-sm">{error}</div>}
 
-          {/* Submit */}
-          <div className="flex items-center gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium rounded-xl transition-colors"
-            >
-              <Save className="w-4 h-4" />
-              {saving ? 'Creating...' : 'Create Artifact'}
-            </button>
-            <span className="text-xs text-slate-500">Writes directly to Supabase</span>
-          </div>
+          <button
+            type="submit"
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Creating...' : 'Create Artifact'}
+          </button>
+
         </form>
       </div>
     </div>
