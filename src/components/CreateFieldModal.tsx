@@ -1,57 +1,56 @@
 import React, { useState } from 'react';
 import { useStore } from '../lib/store';
+import { createField } from '../lib/services';
 import type { FieldMode, ParticipantVisibility } from '../lib/types';
 import { X, Globe, Lock, Users, Eye } from 'lucide-react';
 
 export default function CreateFieldModal() {
-  const { modalOpen, setModalOpen, currentUser } = useStore();
+  const { modalOpen, setModalOpen, currentUser, setFields } = useStore();
 
   const [name, setName] = useState('');
   const [mode, setMode] = useState<FieldMode>('SHARED');
   const [visibility, setVisibility] = useState<ParticipantVisibility>('STEWARD_ONLY');
   const [bio, setBio] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (modalOpen !== 'create-field' || !currentUser) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const newField = {
-      id: `f-${Date.now()}`,
-      name: name.trim(),
-      mode,
-      steward_user_id: currentUser.id,
-      steward_display_name: currentUser.display_name,
-      steward_bio: bio || undefined,
-      participant_visibility: visibility,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      artifact_count: 0,
-      participant_count: 1,
-      constraint_count: 0,
-    };
+    setSaving(true);
+    setError(null);
 
-    useStore.setState({
-  fields: [...useStore.getState().fields, newField],
-  memberships: [
-    ...useStore.getState().memberships,
-    {
-      id: `m-${Date.now()}`,
-      field_id: newField.id,
-      user_id: currentUser.id,
-      role: 'STEWARD',
-      created_at: new Date().toISOString(),
-    },
-  ],
-});
+    try {
+      const result = await createField({
+        name: name.trim(),
+        mode,
+        participant_visibility: visibility,
+        steward_user_id: currentUser.id,
+        steward_display_name: currentUser.display_name,
+        steward_bio: bio || null,
+      });
 
+      if (!result?.id) {
+        throw new Error('No ID returned from Supabase');
+      }
 
-    setName('');
-    setBio('');
-    setMode('SHARED');
-    setVisibility('STEWARD_ONLY');
-    setModalOpen(null);
+      const fields = useStore.getState().fields;
+      setFields([result, ...fields]);
+
+      setName('');
+      setBio('');
+      setMode('SHARED');
+      setVisibility('STEWARD_ONLY');
+      setModalOpen(null);
+    } catch (err: any) {
+      console.error('CREATE FIELD FAILED:', err);
+      setError(err.message || 'Failed to create field');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -137,11 +136,14 @@ export default function CreateFieldModal() {
             />
           </div>
 
+          {error && <div className="text-red-400 text-sm">{error}</div>}
+
           <button
             type="submit"
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors"
+            disabled={saving}
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium rounded-xl transition-colors"
           >
-            Create Field
+            {saving ? 'Creating...' : 'Create Field'}
           </button>
         </form>
       </div>
