@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useStore } from '../lib/store';
 import type { ArtifactType, ArtifactVisibility } from '../lib/types';
+import { createArtifact } from '../lib/services';
+
 import { ArrowLeft, Save, FileText, BookOpen, Scroll, BookMarked, Library, Award, Globe, Eye, Lock } from 'lucide-react';
 
 const types: { value: ArtifactType; label: string; icon: React.ElementType; desc: string }[] = [
@@ -19,7 +21,7 @@ const visibilities: { value: ArtifactVisibility; label: string; icon: React.Elem
 ];
 
 export default function CreateArtifact() {
-  const { selectedFieldId, fields, currentUser, setView, addArtifact, addVersion } = useStore();
+  const { selectedFieldId, fields, currentUser, setView } = useStore();
   const field = fields.find(f => f.id === selectedFieldId);
 
   const [title, setTitle] = useState('');
@@ -27,46 +29,41 @@ export default function CreateArtifact() {
   const [type, setType] = useState<ArtifactType>('NOTE');
   const [visibility, setVisibility] = useState<ArtifactVisibility>('FIELD_ONLY');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!field || !currentUser) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
+
     setSaving(true);
+    setError(null);
 
-    const id = `a-${Date.now()}`;
-    const now = new Date().toISOString();
+    try {
+      const result = await createArtifact({
+        field_id: selectedFieldId!,
+        title: title.trim(),
+        content: content.trim(),
+        type,
+        visibility,
+      });
 
-    addArtifact({
-      id,
-      field_id: selectedFieldId!,
-      type,
-      state: 'DRAFT',
-      visibility,
-      title: title.trim(),
-      content: content.trim(),
-      original_author: currentUser.id,
-      created_at: now,
-      updated_at: now,
-      author_name: currentUser.display_name,
-      version_count: 1,
-    });
+      console.log("CREATED:", result);
 
-    addVersion({
-      id: `v-${Date.now()}`,
-      artifact_id: id,
-      version_number: 1,
-      content_snapshot: 'Initial creation',
-      edited_by: currentUser.id,
-      created_at: now,
-      editor_name: currentUser.display_name,
-    });
+      const newId = result?.id;
 
-    setTimeout(() => {
+      if (!newId) {
+        throw new Error("No ID returned from Supabase");
+      }
+
+      setView('artifact-detail', selectedFieldId, newId);
+    } catch (err: any) {
+      console.error("CREATE FAILED:", err);
+      setError(err.message || "Failed to create artifact");
+    } finally {
       setSaving(false);
-      setView('artifact-detail', selectedFieldId, id);
-    }, 500);
+    }
   };
 
   return (
@@ -82,6 +79,7 @@ export default function CreateArtifact() {
         <h1 className="text-2xl font-bold text-white mb-8">Create New Artifact</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+
           {/* Type selector */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-3">Artifact Type</label>
@@ -153,6 +151,13 @@ export default function CreateArtifact() {
             />
           </div>
 
+          {/* Error */}
+          {error && (
+            <div className="text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Submit */}
           <div className="flex items-center gap-3">
             <button
@@ -163,7 +168,7 @@ export default function CreateArtifact() {
               <Save className="w-4 h-4" />
               {saving ? 'Creating...' : 'Create Artifact'}
             </button>
-            <span className="text-xs text-slate-500">Will be created as DRAFT</span>
+            <span className="text-xs text-slate-500">Writes directly to Supabase</span>
           </div>
         </form>
       </div>

@@ -1,4 +1,4 @@
-import { useSyncExternalStore, useCallback } from 'react';
+import { useSyncExternalStore } from 'react';
 import type { AppView, Field, Artifact, Constraint, Relation, Proposal, ArtifactVersion, FieldMembership } from './types';
 
 interface AppState {
@@ -35,8 +35,12 @@ const initialState: AppState = {
   artifactStateFilter: 'ALL',
   searchQuery: '',
   modalOpen: null,
-  currentUser: null,
-  currentRole: null,
+  currentUser: {
+    id: 'david-killion',
+    display_name: 'David Killion',
+    email: 'david@example.com',
+  },
+  currentRole: 'STEWARD',
 };
 
 let state = { ...initialState };
@@ -60,7 +64,6 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
-// Hook
 export function useStore(): AppState & {
   setView: (view: AppView, fieldId?: string | null, artifactId?: string | null) => void;
   setFields: (fields: Field[]) => void;
@@ -70,13 +73,7 @@ export function useStore(): AppState & {
   setProposals: (proposals: Proposal[]) => void;
   setVersions: (versions: ArtifactVersion[]) => void;
   setMemberships: (memberships: FieldMembership[]) => void;
-  addArtifact: (artifact: Artifact) => void;
   updateArtifact: (id: string, updates: Partial<Artifact>) => void;
-  addConstraint: (constraint: Constraint) => void;
-  addRelation: (relation: Relation) => void;
-  addProposal: (proposal: Proposal) => void;
-  updateProposal: (id: string, updates: Partial<Proposal>) => void;
-  addVersion: (version: ArtifactVersion) => void;
   setArtifactTypeFilter: (f: string) => void;
   setArtifactStateFilter: (f: string) => void;
   setSearchQuery: (q: string) => void;
@@ -97,15 +94,8 @@ export function useStore(): AppState & {
     setProposals: (proposals) => setState({ proposals }),
     setVersions: (versions) => setState({ versions }),
     setMemberships: (memberships) => setState({ memberships }),
-    addArtifact: (artifact) => setState({ artifacts: [...getState().artifacts, artifact] }),
     updateArtifact: (id, updates) =>
       setState({ artifacts: getState().artifacts.map(a => a.id === id ? { ...a, ...updates } : a) }),
-    addConstraint: (constraint) => setState({ constraints: [...getState().constraints, constraint] }),
-    addRelation: (relation) => setState({ relations: [...getState().relations, relation] }),
-    addProposal: (proposal) => setState({ proposals: [...getState().proposals, proposal] }),
-    updateProposal: (id, updates) =>
-      setState({ proposals: getState().proposals.map(p => p.id === id ? { ...p, ...updates } : p) }),
-    addVersion: (version) => setState({ versions: [...getState().versions, version] }),
     setArtifactTypeFilter: (f) => setState({ artifactTypeFilter: f }),
     setArtifactStateFilter: (f) => setState({ artifactStateFilter: f }),
     setSearchQuery: (q) => setState({ searchQuery: q }),
@@ -115,6 +105,5 @@ export function useStore(): AppState & {
   };
 }
 
-// Static access for non-component code
 useStore.getState = getState;
 useStore.setState = setState;
