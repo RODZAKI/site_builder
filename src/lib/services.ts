@@ -188,3 +188,7 @@ export async function getMembershipsByField(fieldId: string) {
   if (error) throw error;
   return data;
 }
+
+export async function fetchFields() {
+  return services.listFields();
+}
