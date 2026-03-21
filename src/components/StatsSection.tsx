@@ -1,9 +1,32 @@
-import React from 'react';
-import { useStore } from '../lib/store';
+import React, { useEffect, useState } from 'react';
+import { getFields, getPublicArtifacts, getRelationsByField, getConstraintsByField } from '../lib/services';
 import { Layers, FileText, GitBranch, Link2, Users, Lock } from 'lucide-react';
 
 export default function StatsSection() {
-  const { fields, artifacts, relations, constraints } = useStore();
+  const [fields, setFields] = useState<any[]>([]);
+  const [artifacts, setArtifacts] = useState<any[]>([]);
+  const [relations, setRelations] = useState<any[]>([]);
+  const [constraints, setConstraints] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const f = await getFields();
+      setFields(f);
+
+      const a = await getPublicArtifacts();
+      setArtifacts(a);
+
+      if (f.length > 0) {
+        const fieldId = f[0].id;
+        const r = await getRelationsByField(fieldId);
+        const c = await getConstraintsByField(fieldId);
+        setRelations(r || []);
+        setConstraints(c || []);
+      }
+    }
+
+    load().catch(err => console.error('STATS LOAD ERROR:', err));
+  }, []);
 
   const stats = [
     { icon: Layers, label: 'Active Fields', value: fields.length, color: 'from-indigo-500 to-blue-500' },
