@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchFields } from '../lib/services';
+import { getFields } from '../lib/services';
 import { useStore } from '../lib/store';
 
 interface AppContextType {
@@ -21,10 +21,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { setFields } = useStore();
 
   useEffect(() => {
-    fetchFields().then((fields) => {
-      setFields(fields);
-      console.log('Fields loaded:', fields);
-    });
+    getFields()
+      .then((fields) => {
+        setFields(fields);
+      })
+      .catch((err) => {
+        console.error('Failed to load fields from Supabase:', err);
+        setFields([]);
+      });
   }, []);
 
   const toggleSidebar = () => {
