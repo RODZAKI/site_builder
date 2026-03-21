@@ -1,23 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStore } from '../lib/store';
 import FieldCard from './FieldCard';
+import { getFields } from '../lib/services';
 import { Search, Filter, Plus, Globe, Lock } from 'lucide-react';
 
 export default function FieldDashboard() {
-  const { fields, currentUser, setModalOpen } = useStore();
+  const { fields, currentUser, setModalOpen, setFields } = useStore();
   const [modeFilter, setModeFilter] = useState<'ALL' | 'SHARED' | 'PERSONAL'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
+  useEffect(() => {
+    getFields()
+      .then(setFields)
+      .catch(err => console.error('FIELD LOAD ERROR:', err));
+  }, [setFields]);
+
   const filtered = fields.filter(f => {
     if (modeFilter !== 'ALL' && f.mode !== modeFilter) return false;
-    if (searchTerm && !f.name.toLowerCase().includes(searchTerm.toLowerCase()) && !f.steward_display_name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (
+      searchTerm &&
+      !f.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !(f.steward_display_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+    ) return false;
     return true;
   });
 
   return (
     <section id="fields-section" className="py-24 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
             <span className="text-xs font-semibold tracking-widest uppercase text-indigo-400 mb-2 block">Cognitive Spaces</span>
@@ -34,7 +44,6 @@ export default function FieldDashboard() {
           )}
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -68,7 +77,6 @@ export default function FieldDashboard() {
           </div>
         </div>
 
-        {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filtered.map(field => (
             <FieldCard key={field.id} field={field} />
@@ -81,7 +89,6 @@ export default function FieldDashboard() {
           </div>
         )}
 
-        {/* Stats bar */}
         <div className="mt-12 flex items-center justify-center gap-8 text-sm text-slate-500">
           <span>{fields.length} total fields</span>
           <span className="w-1 h-1 rounded-full bg-slate-700" />
