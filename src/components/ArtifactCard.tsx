@@ -32,15 +32,18 @@ interface Props {
 
 export default function ArtifactCard({ artifact, compact }: Props) {
   const { setView, selectedFieldId } = useStore();
+
   const TypeIcon = typeIcons[artifact.type] || FileText;
   const VisIcon = visIcons[artifact.visibility] || Eye;
 
+  const author = artifact.author_name || 'Unknown';
+  const preview = artifact.content ? artifact.content.slice(0, 150) : '';
+
   return (
     <div
-      onClick={() => setView('artifact-detail', selectedFieldId, artifact.id)}
+      onClick={() => setView('artifact-detail', artifact.field_id, artifact.id)}
       className={`group relative rounded-xl bg-slate-900/40 border border-slate-800/50 hover:border-indigo-500/30 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/5 ${compact ? 'p-4' : 'p-5'}`}
     >
-      {/* Top row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
@@ -56,23 +59,20 @@ export default function ArtifactCard({ artifact, compact }: Props) {
         </div>
       </div>
 
-      {/* Title */}
       <h4 className="text-sm font-semibold text-white mb-2 group-hover:text-indigo-300 transition-colors line-clamp-2">
         {artifact.title}
       </h4>
 
-      {/* Content preview */}
       {!compact && (
         <p className="text-xs text-slate-500 line-clamp-2 mb-3 leading-relaxed">
-          {artifact.content?.substring(0, 150)}...
+          {preview}...
         </p>
       )}
 
-      {/* Footer */}
       <div className="flex items-center justify-between text-[11px] text-slate-600">
         <span className="flex items-center gap-1">
           <User className="w-3 h-3" />
-          {artifact.author_name || 'Unknown'}
+          {author}
         </span>
         <span className="flex items-center gap-1">
           <GitBranch className="w-3 h-3" />
@@ -80,7 +80,6 @@ export default function ArtifactCard({ artifact, compact }: Props) {
         </span>
       </div>
 
-      {/* Superseded indicator */}
       {artifact.state === 'SUPERSEDED' && (
         <div className="absolute inset-0 rounded-xl bg-slate-950/30 pointer-events-none" />
       )}
