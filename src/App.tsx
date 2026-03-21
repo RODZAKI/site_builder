@@ -1,5 +1,5 @@
-import { useEffect } from "react"
-import { testSupabase } from "./lib/api"
+import { useEffect } from "react";
+import { testSupabase } from "./lib/api";
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -20,13 +20,13 @@ import MasterIndex from "./pages/MasterIndex";
 import Threads from "./pages/Threads";
 import ThreadView from "./pages/ThreadView";
 
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+
 const queryClient = new QueryClient();
 
 function ThreadQueryHandler() {
   const [searchParams] = useSearchParams();
   const thread = searchParams.get("thread");
-
-  console.log("THREAD ID:", thread);
 
   if (thread) {
     return <Navigate to={`/thread/${thread}`} replace />;
@@ -35,32 +35,106 @@ function ThreadQueryHandler() {
   return <Index />;
 }
 
-export default function App() {
+function AuthStatusBar() {
+  const { user, loading, signInWithMagicLink, signOut } = useAuth();
 
-  // ✅ THIS is the only thing we added
-  useEffect(() => {
-    testSupabase()
-  }, [])
+  async function handleSignIn() {
+    const email = window.prompt("Enter email for magic link sign-in:");
+    if (!email) return;
+
+    const { error } = await signInWithMagicLink(email);
+
+    if (error) {
+      window.alert(`Sign-in error: ${error}`);
+      return;
+    }
+
+    window.alert("Magic link sent. Check your email.");
+  }
+
+  async function handleSignOut() {
+    const { error } = await signOut();
+
+    if (error) {
+      window.alert(`Sign-out error: ${error}`);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="w-full border-b px-4 py-2 text-sm text-muted-foreground">
+        Auth: loading…
+      </div>
+    );
+  }
 
   return (
+    <div className="w-full border-b px-4 py-2 text-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
+        <div>
+          {user ? (
+            <>
+              Signed in as <span className="font-medium">{user.email}</span>
+            </>
+          ) : (
+            <span className="text-muted-foreground">Not signed in</span>
+          )}
+        </div>
+
+        <div>
+          {user ? (
+            <button
+              onClick={handleSignOut}
+              className="rounded border px-3 py-1 hover:bg-muted"
+            >
+              Sign out
+            </button>
+          ) : (
+            <button
+              onClick={handleSignIn}
+              className="rounded border px-3 py-1 hover:bg-muted"
+            >
+              Sign in
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AppShell() {
+  return (
     <ThemeProvider defaultTheme="light">
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
 
-          <HashRouter>
-            <Routes>
-              <Route path="/" element={<ThreadQueryHandler />} />
-              <Route path="/master-index" element={<MasterIndex />} />
-              <Route path="/threads" element={<Threads />} />
-              <Route path="/thread/:id" element={<ThreadView />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </HashRouter>
-
-        </TooltipProvider>
-      </QueryClientProvider>
+        <HashRouter>
+          <AuthStatusBar />
+          <Routes>
+            <Route path="/" element={<ThreadQueryHandler />} />
+            <Route path="/master-index" element={<MasterIndex />} />
+            <Route path="/threads" element={<Threads />} />
+            <Route path="/thread/:id" element={<ThreadView />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </HashRouter>
+      </TooltipProvider>
     </ThemeProvider>
+  );
+}
+
+export default function App() {
+  useEffect(() => {
+    testSupabase();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <AppShell />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
