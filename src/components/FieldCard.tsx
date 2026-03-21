@@ -10,12 +10,13 @@ interface Props {
 export default function FieldCard({ field }: Props) {
   const { setView } = useStore();
 
+  const stewardName = field.steward_display_name || 'Unknown Steward';
+
   return (
     <div
       onClick={() => setView('field-detail', field.id)}
       className="group relative p-6 rounded-2xl bg-slate-900/60 border border-slate-800/50 hover:border-indigo-500/30 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5"
     >
-      {/* Mode badge */}
       <div className="flex items-center justify-between mb-4">
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
           field.mode === 'SHARED'
@@ -28,21 +29,18 @@ export default function FieldCard({ field }: Props) {
         <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-indigo-400 transition-colors" />
       </div>
 
-      {/* Name */}
       <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-indigo-300 transition-colors">
         {field.name}
       </h3>
 
-      {/* Steward */}
       <div className="flex items-center gap-2 mb-4">
         <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
           <User className="w-3 h-3 text-white" />
         </div>
-        <span className="text-sm text-slate-400">{field.steward_display_name}</span>
+        <span className="text-sm text-slate-400">{stewardName}</span>
         <Shield className="w-3 h-3 text-indigo-400" title="Steward" />
       </div>
 
-      {/* Stats */}
       <div className="flex items-center gap-4 text-xs text-slate-500">
         <span className="flex items-center gap-1">
           <FileText className="w-3.5 h-3.5" />
@@ -58,7 +56,6 @@ export default function FieldCard({ field }: Props) {
         </span>
       </div>
 
-      {/* Hover glow */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
     </div>
   );
